@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  leafguard-api:
+    build: .
+    container_name: leafguard_ai_server
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8000
+      - DEBUG=False
+    volumes:
+      - ./LeafGuard-CNN_model.pkl:/app/LeafGuard-CNN_model.pkl
+      - ./class_indices.json:/app/class_indices.json

@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LeafGuard AI - Plant Disease Detection & Care</title>
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌿</text></svg>">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    <header class="navbar">
+        <div class="nav-container">
+            <a href="/" class="brand-logo">
+                <div class="logo-icon-wrapper">
+                    <i class="fa-solid fa-seedling"></i>
+                </div>
+                <div class="brand-text">
+                    <span class="brand-title">LeafGuard <span class="highlight">AI</span></span>
+                    <span class="brand-subtitle">CNN Plant Disease Classifier</span>
+                </div>
+            </a>
+            <nav class="nav-links">
+                <a href="#scanner" class="nav-link active"><i class="fa-solid fa-microscope"></i> Diagnose</a>
+                <a href="#crops" class="nav-link"><i class="fa-solid fa-wheat-awn"></i> Crops</a>
+                <a href="#about" class="nav-link"><i class="fa-solid fa-circle-info"></i> About</a>
+                <a href="/docs" target="_blank" class="nav-link api-btn"><i class="fa-solid fa-code"></i> API Docs</a>
+                <a href="https://github.com" target="_blank" class="nav-link github-btn" id="github-link"><i class="fa-brands fa-github"></i> GitHub</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="main-content">
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <div class="hero-badge">
+                <span class="pulse-indicator"></span> Deep Learning CNN &bull; 38 Disease Classes &bull; Real-time Diagnosis
+            </div>
+            <h1 class="hero-headline">Instant Crop Disease Diagnosis & Actionable Remedies</h1>
+            <p class="hero-subline">
+                Upload a photo of an infected or healthy leaf to diagnose plant health in seconds.
+                Get precise species identification, disease severity, organic remedies, and chemical controls.
+            </p>
+        </section>
+
+        <!-- Scanner Card Section -->
+        <section id="scanner" class="scanner-section">
+            <div class="scanner-card">
+                <!-- Dropzone Area -->
+                <div id="dropzone" class="dropzone-box">
+                    <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp,image/jpg" hidden>
+                    
+                    <div id="emptyState" class="dropzone-empty-state">
+                        <div class="upload-icon-circle">
+                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                        </div>
+                        <h3>Drag & Drop Leaf Photo Here</h3>
+                        <p>or click to browse from your device</p>
+                        <div class="upload-actions">
+                            <button type="button" class="btn btn-primary" id="browseBtn">
+                                <i class="fa-solid fa-folder-open"></i> Select Leaf Image
+                            </button>
+                            <button type="button" class="btn btn-secondary" id="sampleBtn">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i> Try Sample Leaf
+                            </button>
+                            <button type="button" class="btn btn-outline" id="cameraBtn">
+                                <i class="fa-solid fa-camera"></i> Use Camera
+                            </button>
+                        </div>
+                        <span class="file-hint">Supported formats: JPG, PNG, WebP (Max 15MB)</span>
+                    </div>
+
+                    <!-- Image Preview Area -->
+                    <div id="previewState" class="preview-container hidden">
+                        <div class="preview-wrapper">
+                            <img id="imagePreview" src="" alt="Selected leaf preview">
+                            <div class="preview-overlay">
+                                <button type="button" class="btn-icon" id="clearBtn" title="Remove image">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="preview-details">
+                            <div class="file-meta">
+                                <i class="fa-solid fa-image"></i>
+                                <span id="fileNameDisplay">leaf_photo.jpg</span>
+                                <span id="fileSizeDisplay" class="meta-tag">1.2 MB</span>
+                            </div>
+                            <div class="preview-actions">
+                                <button type="button" class="btn btn-outline" id="reselectBtn">
+                                    <i class="fa-solid fa-arrow-rotate-left"></i> Change Photo
+                                </button>
+                                <button type="button" class="btn btn-success" id="analyzeBtn">
+                                    <i class="fa-solid fa-magnifying-glass-chart"></i> Run Deep Diagnosis
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Camera View Area -->
+                    <div id="cameraContainer" class="camera-container hidden">
+                        <video id="cameraVideo" autoplay playsinline></video>
+                        <canvas id="cameraCanvas" class="hidden"></canvas>
+                        <div class="camera-controls">
+                            <button type="button" class="btn btn-secondary" id="closeCameraBtn">
+                                <i class="fa-solid fa-xmark"></i> Cancel
+                            </button>
+                            <button type="button" class="btn btn-primary" id="captureBtn">
+                                <i class="fa-solid fa-circle-dot"></i> Snap Leaf
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Loading State Overlay -->
+                <div id="loadingOverlay" class="loading-overlay hidden">
+                    <div class="spinner-box">
+                        <div class="plant-spinner">
+                            <i class="fa-solid fa-leaf rotating-leaf"></i>
+                        </div>
+                        <h3>Scanning Leaf Cellular Features...</h3>
+                        <p>Passing tensor through Convolutional Neural Network</p>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analysis Results Section -->
+                <div id="resultsCard" class="results-container hidden">
+                    <div class="result-header">
+                        <div class="result-headline">
+                            <div id="healthBadge" class="status-badge disease">
+                                <span class="badge-dot"></span>
+                                <span id="statusText">Disease Detected</span>
+                            </div>
+                            <span class="prediction-time"><i class="fa-regular fa-clock"></i> Response in &lt; 80ms</span>
+                        </div>
+                        <div class="result-summary-grid">
+                            <div class="summary-tile">
+                                <span class="tile-label"><i class="fa-solid fa-seedling"></i> Plant Species</span>
+                                <h2 id="plantName" class="tile-value">Tomato</h2>
+                            </div>
+                            <div class="summary-tile">
+                                <span class="tile-label"><i class="fa-solid fa-virus"></i> Diagnosis</span>
+                                <h2 id="diseaseName" class="tile-value text-accent">Early Blight</h2>
+                            </div>
+                            <div class="summary-tile">
+                                <span class="tile-label"><i class="fa-solid fa-gauge-high"></i> Confidence</span>
+                                <div class="confidence-wrapper">
+                                    <h2 id="confidenceScore" class="tile-value">98.4%</h2>
+                                    <div class="confidence-bar">
+                                        <div id="confidenceFill" class="confidence-fill" style="width: 98.4%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="summary-tile">
+                                <span class="tile-label"><i class="fa-solid fa-shield-virus"></i> Severity Level</span>
+                                <h2 id="severityLevel" class="tile-value">Moderate</h2>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Disease Quick Summary -->
+                    <div class="disease-overview-card">
+                        <div class="overview-header">
+                            <i class="fa-solid fa-clipboard-check"></i>
+                            <h4>Pathogen & Condition Overview</h4>
+                        </div>
+                        <p id="pathogenType" class="pathogen-text"><strong>Pathogen:</strong> Alternaria solani (Fungus)</p>
+                        <p id="diseaseSummary" class="summary-description">
+                            Foliar disease characterized by concentric target-board rings on older foliage, yellow halos, and defoliation.
+                        </p>
+                    </div>
+
+                    <!-- Accordion Tabs for Detailed Care Guide -->
+                    <div class="tabs-container">
+                        <div class="tab-buttons">
+                            <button class="tab-btn active" data-tab="symptoms">
+                                <i class="fa-solid fa-eye"></i> Symptoms
+                            </button>
+                            <button class="tab-btn" data-tab="organic">
+                                <i class="fa-solid fa-leaf"></i> Organic Remedies
+                            </button>
+                            <button class="tab-btn" data-tab="chemical">
+                                <i class="fa-solid fa-flask-vial"></i> Chemical Treatments
+                            </button>
+                            <button class="tab-btn" data-tab="prevention">
+                                <i class="fa-solid fa-shield-halved"></i> Prevention Plan
+                            </button>
+                            <button class="tab-btn" data-tab="alternatives">
+                                <i class="fa-solid fa-chart-pie"></i> Probability Breakdown
+                            </button>
+                        </div>
+
+                        <!-- Tab Content: Symptoms -->
+                        <div id="tab-symptoms" class="tab-panel active">
+                            <ul id="symptomsList" class="info-checklist">
+                                <li>Dark brown spots with concentric target-board rings.</li>
+                                <li>Yellowing (chlorosis) surrounding the spots.</li>
+                            </ul>
+                        </div>
+
+                        <!-- Tab Content: Organic Remedies -->
+                        <div id="tab-organic" class="tab-panel">
+                            <div class="remedy-alert organic-alert">
+                                <i class="fa-solid fa-seedling"></i>
+                                <div>
+                                    <strong>Eco-Friendly & Non-Toxic:</strong>
+                                    Safe for organic gardens, beneficial pollinators, and edible produce.
+                                </div>
+                            </div>
+                            <ul id="organicList" class="info-checklist">
+                                <li>Apply neem oil or sulfur-based organic fungicides.</li>
+                            </ul>
+                        </div>
+
+                        <!-- Tab Content: Chemical Treatments -->
+                        <div id="tab-chemical" class="tab-panel">
+                            <div class="remedy-alert chemical-alert">
+                                <i class="fa-solid fa-triangle-exclamation"></i>
+                                <div>
+                                    <strong>Commercial Fungicide Notice:</strong>
+                                    Always follow local regulatory guidelines, application rates, and pre-harvest intervals.
+                                </div>
+                            </div>
+                            <ul id="chemicalList" class="info-checklist">
+                                <li>Apply Chlorothalonil or Mancozeb sprays.</li>
+                            </ul>
+                        </div>
+
+                        <!-- Tab Content: Prevention -->
+                        <div id="tab-prevention" class="tab-panel">
+                            <ul id="preventionList" class="info-checklist">
+                                <li>Rotate tomato crops every 2-3 years away from solanaceous plants.</li>
+                            </ul>
+                        </div>
+
+                        <!-- Tab Content: Probability Breakdown -->
+                        <div id="tab-alternatives" class="tab-panel">
+                            <div id="alternativesContainer" class="alternatives-grid">
+                                <!-- Top-K predictions populated by JS -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bottom Action Controls -->
+                    <div class="result-actions">
+                        <button type="button" class="btn btn-outline" id="printReportBtn">
+                            <i class="fa-solid fa-print"></i> Print Diagnosis Report
+                        </button>
+                        <button type="button" class="btn btn-primary" id="scanAnotherBtn">
+                            <i class="fa-solid fa-rotate"></i> Scan Another Leaf
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Supported Crops Section -->
+        <section id="crops" class="crops-section">
+            <div class="section-header">
+                <h2>Supported Plant Varieties</h2>
+                <p>LeafGuard's CNN architecture has been trained on over 50,000+ validated leaves across 14 major agricultural species.</p>
+            </div>
+            <div class="crop-grid">
+                <div class="crop-pill"><i class="fa-solid fa-apple-whole"></i> Apple (4 conditions)</div>
+                <div class="crop-pill"><i class="fa-solid fa-circle"></i> Blueberry (Healthy)</div>
+                <div class="crop-pill"><i class="fa-solid fa-cherries"></i> Cherry (2 conditions)</div>
+                <div class="crop-pill"><i class="fa-solid fa-wheat-awn"></i> Corn / Maize (4 conditions)</div>
+                <div class="crop-pill"><i class="fa-solid fa-wine-glass"></i> Grape (4 conditions)</div>
+                <div class="crop-pill"><i class="fa-solid fa-sun"></i> Orange / Citrus (HLB)</div>
+                <div class="crop-pill"><i class="fa-solid fa-cubes"></i> Peach (2 conditions)</div>
+                <div class="crop-pill"><i class="fa-solid fa-pepper-hot"></i> Bell Pepper (2 conditions)</div>
+                <div class="crop-pill"><i class="fa-solid fa-bowl-food"></i> Potato (3 conditions)</div>
+                <div class="crop-pill"><i class="fa-solid fa-cubes"></i> Raspberry (Healthy)</div>
+                <div class="crop-pill"><i class="fa-solid fa-seedling"></i> Soybean (Healthy)</div>
+                <div class="crop-pill"><i class="fa-solid fa-leaf"></i> Squash (Powdery Mildew)</div>
+                <div class="crop-pill"><i class="fa-solid fa-heart"></i> Strawberry (2 conditions)</div>
+                <div class="crop-pill"><i class="fa-solid fa-apple-whole text-red"></i> Tomato (10 conditions)</div>
+            </div>
+        </section>
+
+        <!-- Architecture & About Section -->
+        <section id="about" class="about-section">
+            <div class="about-card">
+                <div class="about-text">
+                    <h3><i class="fa-solid fa-brain"></i> Engineered with Deep Learning</h3>
+                    <p>
+                        LeafGuard AI employs deep convolutional neural networks with sequential Conv2D feature extractors, 
+                        ReLU activations, max pooling, dense classification layers, and softmax multi-class probability scoring.
+                    </p>
+                    <div class="specs-grid">
+                        <div class="spec-item">
+                            <span class="spec-number">38</span>
+                            <span class="spec-label">Diseases & States</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-number">224 &times; 224</span>
+                            <span class="spec-label">Input Resolution</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-number">FastAPI</span>
+                            <span class="spec-label">High-Speed Backend</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-number">&lt; 100ms</span>
+                            <span class="spec-label">Inference Latency</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-brand">
+                <span class="footer-logo">🌿 LeafGuard AI</span>
+                <p>Smart Agriculture &bull; Sustainable Crop Protection</p>
+            </div>
+            <div class="footer-links">
+                <a href="/docs"><i class="fa-solid fa-book"></i> Interactive Swagger API</a>
+                <a href="/health"><i class="fa-solid fa-heart-pulse"></i> System Health</a>
+                <a href="/classes"><i class="fa-solid fa-list-check"></i> 38 Disease Classes</a>
+            </div>
+            <div class="footer-copy">
+                &copy; LeafGuard AI. Open-source plant pathology project.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast Notification Container -->
+    <div id="toast" class="toast hidden"></div>
+
+    <!-- Application Script -->
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
