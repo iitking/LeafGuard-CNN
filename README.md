@@ -294,17 +294,3 @@ Distributed under the MIT License. See `LICENSE` for more information.
 <div align="center">
   <sub>Developed with ❤️ for Farmers, Gardeners, and Agronomists worldwide.</sub>
 </div>
-<!-- log -->
-<!-- log -->
-<!-- log -->
-<!-- log -->
-<!-- log -->
-<!-- log -->
-<!-- log -->
-<!-- log -->
-<!-- log -->
-<!-- log -->
-<!-- log -->
-<!-- log -->
-<!-- log -->
-<!-- log -->
